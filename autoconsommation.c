@@ -20,6 +20,7 @@ LiquidCrystal_I2C lcd(0x3f,16,2);        // 2 Si Le LCD ne fonctionne pas, alors
 
 #include <DallasTemperature.h>           // 7 librairie de la sonde Dallas
 #include <OneWire.h>                     // 7 librairie qui va gérer les différente adresses des sondes de température
+#include <Time.h>						// librairie de definition et calcul du temps
 
 //#include <Servo.h>                     // 3 inclure la librairie "Servo.h" 
 //Servo myservo;                         // 3 Création de l'objet Servo pour controler Servo
@@ -49,7 +50,8 @@ unsigned long previous_millis = 0;   // 2 création de la variable "previous_mil
 const int SONDE=12;          // 7 numéro de broche sur l'arduino pour la temperature
 float Temp=0 ;               // 7 création d'une variable temporaire de la températude du ballon d'eau chaude
 float TEMPERATURE0 = 0;      // 7 variable flotante pour récupérer la température 
-long Compteur=0;             // 7 initialisation du compteur qui décompte le temps écoulé pendant lequel l'eau stagne sous les 55°C
+//long Compteur=0;             // 7 initialisation du compteur qui décompte le temps écoulé pendant lequel l'eau stagne sous les 55°C
+time_t Compteur = now(); 	// nombre de secondes depuis le 1 Janvier 1970
 
 OneWire ONE_WIRE_BUS (SONDE);              // 7 création de l'objet ONE_WIRE_BUS1 sur la pin SOND_1 (48 dans mon cas)
 DallasTemperature sensor(&ONE_WIRE_BUS);   // 7 utilisation du bus OneWire
@@ -159,7 +161,7 @@ void loop()
        if (Temp>0)                     //7 pour éviter les sauts de valeur négative de la sonde dallas (genre artefact)
        {TEMPERATURE0=Temp;}            //7 si la temp >0 on récupère la valeur de la température sinon laisser l'artefact de coté
 
-       Compteur= Compteur+1;           //7 le comptage du temps commence
+       //Compteur= Compteur+1;           //7 le comptage du temps commence
       
 //-------------------------------------Si il y a des Watts , balance en dans le chauffe eau---------------------------------
 
@@ -179,9 +181,10 @@ void loop()
  //--------------------------- ET POUR AVOIR DE L'EAU A 55°C UNE FOIS PAr SEMAINE (pour eliminer la legionelose)-------     
 
  if (TEMPERATURE0 > 55)          // 7 Si le chauffe atteint naturellement 55°C (avec le photovoltaique), 
- {Compteur =0;}                  // 7 alors on remet le compteur a 0
+ {Compteur = now();}                  // 7 alors on remet le compteur a now()
        
- if (Compteur > 100000 )         // 7 si le compteur arrive à 100 000 (dans la réalité +/- 5 jours a vérifier =(+/- 432 000 secondes)
+ //if (Compteur > 100000 )         // 7 si le compteur arrive à 100 000 (dans la réalité +/- 5 jours a vérifier =(+/- 432 000 secondes)
+ if (now() >= (Compteur + 604800)) // 604800 = 7 jours, baisser a 432000 pour 5 jours
  {intensite_led = 250;}          //7 on met la led à fond (pour chauffer le ballon d'eau chaude)
 
 
